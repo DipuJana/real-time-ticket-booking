@@ -1,17 +1,17 @@
 export class CacheKeys {
-  private static prefix='ticket-booking';
-  private static version='v1';
-
+  static prefix = 'ticket-booking';
+  static version = 'v1';
 
   // venue cache
-  public static venue(id:string):string{
+  static venue(id) {
     return `${this.prefix}:${this.version}:venue:${id}`;
   }
 
-  static venuesByCity(city: string): string {
+  static venuesByCity(city) {
     return `${this.prefix}:${this.version}:venues:city:${city}`;
   }
-  static venuePattern(venueId?: string): string {
+
+  static venuePattern(venueId) {
     return venueId ? `${this.prefix}:${this.version}:venue:${venueId}` : `${this.prefix}:${this.version}:venue:*`;
   }
 
