@@ -1,7 +1,7 @@
 import "./env.js";
 import mongoose from "mongoose";
 
-export async function connectDatabase(): Promise<void> {
+export async function connectDatabase() {
   const mongoUri = process.env.MONGO_URI;
 
   if (!mongoUri) {
