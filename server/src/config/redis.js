@@ -2,6 +2,7 @@ import "./env.js";
 import Redis from "ioredis";
 
 const redisUrl = process.env.REDIS_URL;
+console.log("Redis URL:", redisUrl);
 
 if (!redisUrl) {
   throw new Error("REDIS_URL is not defined");
