@@ -7,6 +7,7 @@ import { venueRoutes } from './modules/event/routes/venueRoutes.js';
 
 // Use venue routes
 app.use('/api', venueRoutes);
+console.log(process.env.PORT);
 const PORT = process.env.PORT || 5000;
 async function startServer() {
 
