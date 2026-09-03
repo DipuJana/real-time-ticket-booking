@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { venueController } from '../controllers/venueController.js';
-import { venueService } from '../services/venueService.js';
-import { venueRepository } from '../repositories/venueRepository.js';
+import { venueController } from '../modules/event/controllers/venueController.js';
+import { venueService } from '../modules/event/services/venueService.js';
+import { venueRepository } from '../modules/event/repositories/venueRepository.js';
 const router = Router();
 
 // Initialize Dependencies

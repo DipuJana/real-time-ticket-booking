@@ -3,7 +3,9 @@ import "./config/env.js";
 import { connectDatabase } from "./config/database.js";
 import { redis } from "./config/redis.js";
 
-import { venueRoutes } from './modules/event/routes/venueRoutes.js';
+import {venueRoutes} from './routes/venueRoutes.js';
+
+// import { venueRoutes } from './modules/event/routes/venueRoutes.js';
 
 // Use venue routes
 app.use('/api', venueRoutes);
