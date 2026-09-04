@@ -6,11 +6,7 @@ export async function findById(inventoryId) {
 
 export async function findByShowId(showId) {
   return ShowInventory.find({ showId })
-    .populate("seatId")
-    .sort({
-      "seatId.rowLabel": 1,
-      "seatId.seatNumber": 1,
-    });
+    .populate("seatId");
 }
 
 export async function findByShowAndSeat(showId, seatId) {

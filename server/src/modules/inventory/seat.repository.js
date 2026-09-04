@@ -17,6 +17,6 @@ export async function findByIds(seatIds) {
   });
 }
 
-export async function create(seatData) {
-  return Seat.create(seatData);
+export async function createMany(seats) {
+  return Seat.insertMany(seats);
 }
