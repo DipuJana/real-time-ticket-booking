@@ -12,7 +12,7 @@ export class CacheInvalidationService {
     ];
 
     await this.deleteKeysWithWildcard(keys);
-    console.log('Invalid caches for event with id: ${eventId}');
+    console.log(`Invalid caches for event with id: ${eventId}`);
   }
   async deleteKeysWithWildcard(keys) {
     const pipeline = redis.pipeline();

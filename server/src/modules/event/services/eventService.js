@@ -8,6 +8,7 @@ export class eventService {
   constructor(EventRepository) {
     this.EventRepository = EventRepository;
   }
+
   async createEvent(eventData) {
     const event=await this.EventRepository.createEvent(eventData);
     const response=new EventResponseDto(event);
@@ -34,4 +35,42 @@ export class eventService {
     await cacheService.set(cacheKey,result,{ttl:3600});
     return result;
   }
+
+  async getEventById(id){
+    const cacheKey=CacheKeys.event(id);
+    const cached=await cacheService.get(cacheKey);
+    if(cached){
+      console.log('cache hit');
+      return cached;
+    }
+    const event=await this.EventRepository.findEventById(id);
+    if(!event){
+      throw new Error('Event not found');
+    }
+    const response=new EventResponseDto(event);
+    await cacheService.set(cacheKey,response,{ttl:3600});
+    return response;
+  }
+
+  async updateEvent(id, eventData) {
+    const updatedEvent = await this.EventRepository.updateEvent(id, eventData);
+    if (!updatedEvent) {
+      throw new Error('Event not found');
+    }
+    const response = new EventResponseDto(updatedEvent);
+    await cacheInvalidationService.invalidateEventCache(id);
+    return response;
+  }
+
+  async deleteEvent(id) {
+    const deletedEvent = await this.EventRepository.deleteEvent(id);
+    if(deletedEvent){
+      await Promise.all([
+        cacheService.delete(CacheKeys.event(id)),
+        cacheService.deletePattern(CacheKeys.eventsList('*')),
+      ]);
+    }
+    return deletedEvent;
+  }
+
 }

@@ -22,6 +22,9 @@ export class eventRepository{
     if (filter.status) {
         query.status = filter.status;
     }
+    if(filter.id){
+        query._id=filter.id;
+    }
     if (filter.search) {
         query.$text = {
             $search: filter.search
@@ -42,6 +45,15 @@ export class eventRepository{
         events,
         total
     };
+}
+
+async updateEvent(id, eventData) {
+    return await Event.findByIdAndUpdate(id,{$set:eventData}, { new: true,runValidators:true }).lean();
+}
+
+async deleteEvent(id) {
+    const deleted=await Event.findByIdAndDelete(id).lean();
+    return deleted;
 }
 
 }

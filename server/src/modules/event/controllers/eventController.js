@@ -50,6 +50,50 @@ export class eventController {
 
   }
   
+  async getEventById(req,res){
+      try{
+        const {id}=req.params;
+        const event=await this.eventService.getEventById(id);
+        return res.status(200).json({
+          success:true,
+          data:event,
+        })
+      }
+      catch(error){
+        return handleError(res,error);
+      }
+  }
+
+  async updateEvent(req,res){
+    try{
+      const {id}=req.params;
+      const updateData=req.body;
+      const updatedEvent=await this.eventService.updateEvent(id,updateData);
+      return res.status(200).json({
+        success:true,
+        data:updatedEvent,
+        message:'Event updated successfully'
+      })
+    }
+    catch(error){
+      return handleError(res,error);
+    }
+  }
+
+  async deleteEvent(req,res){
+    try{
+      const {id}=req.params;
+      const deletedEvent=await this.eventService.deleteEvent(id);
+      return res.status(200).json({
+        success:true,
+        data:deletedEvent,
+        message:'Event deleted successfully'
+      })
+    }
+    catch(error){
+      return handleError(res,error);
+    }
+  }
 
 
 

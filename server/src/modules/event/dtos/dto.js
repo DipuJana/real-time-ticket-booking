@@ -6,6 +6,7 @@ export class CreateVenueDto {
 }
 export class CreateEventDto {
   constructor(data) {
+    this._id = data._id;
     this.title = data.title;
     this.category = data.category;
     this.dateLocation = data.dateLocation;
@@ -42,6 +43,7 @@ export class UpdateEventDto {
 
 export class EventResponseDto {
   constructor(data) {
+    this._id = data._id;
     this.title = data.title;
     this.category = data.category;
     this.dateLocation = data.dateLocation;
