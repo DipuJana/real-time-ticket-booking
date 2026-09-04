@@ -4,19 +4,24 @@ import * as showInventoryRepository from "./showInventory.repository.js";
 export async function generateSeatsForHall(
   hallId,
   totalRows,
-  seatsPerRow
+  seatsPerRow,
+  premiumRows = []
 ) {
   const seats = [];
 
   for (let row = 0; row < totalRows; row++) {
     const rowLabel = String.fromCharCode(65 + row);
 
+    const seatType = premiumRows.includes(rowLabel)
+      ? "PREMIUM"
+      : "REGULAR";
+
     for (let seatNumber = 1; seatNumber <= seatsPerRow; seatNumber++) {
       seats.push({
         hallId,
         rowLabel,
         seatNumber,
-        seatType: "REGULAR",
+        seatType,
       });
     }
   }
