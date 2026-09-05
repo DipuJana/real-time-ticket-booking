@@ -26,22 +26,21 @@ export class CacheKeys {
   static eventsSearch(query) {
     return `${this.prefix}:${this.version}:events:search:${query}`;
   }
-  eventsByCategory(category) {
+  static eventsByCategory(category) {
     return `${this.prefix}:${this.version}:events:category:${category}`;
   }
-  eventsByCity(city) {
+  static eventsByCity(city) {
     return `${this.prefix}:${this.version}:events:city:${city}`;
   }
 
-  upcomingEvents(date){
+  static upcomingEvents(date){
     return `${this.prefix}:${this.version}:events:upcoming:${date}`;
   }
 
-  // Discovery Event
-  eventDetail(eventId) {
+  static eventDetail(eventId) {
     return `${this.prefix}:${this.version}:event:detail:${eventId}`;
   }
-  eventPattern(eventId) {
+  static eventPattern(eventId) {
     return eventId ? `${this.prefix}:${this.version}:event:*${eventId}*` : `${this.prefix}:${this.version}:event:*`;
   }
 
