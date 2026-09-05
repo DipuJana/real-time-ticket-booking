@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import * as seatRepository from "./seat.repository.js";
 import * as showInventoryRepository from "./showInventory.repository.js";
 
@@ -48,6 +49,8 @@ export async function generateShowInventory(showId, hallId) {
 }
 
 export async function getShowSeats(showId) {
+  await showInventoryRepository.releaseExpiredHolds(showId);
+
   const inventory =
     await showInventoryRepository.findByShowId(showId);
 
@@ -64,3 +67,92 @@ export async function getShowSeats(showId) {
   });
 }
 
+export async function holdSeats(showId, seatIds) {
+  if (!seatIds || seatIds.length === 0) {
+    throw new Error("At least one seat is required");
+  }
+
+  const uniqueSeatIds = [...new Set(seatIds)];
+
+  if (uniqueSeatIds.length !== seatIds.length) {
+    throw new Error("Duplicate seat IDs are not allowed");
+  }
+
+  const holdUntil = new Date(
+    Date.now() + 5 * 60 * 1000
+  );
+
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    const result = await showInventoryRepository.holdSeats(
+      showId,
+      uniqueSeatIds,
+      holdUntil,
+      session
+    );
+
+    if (result.modifiedCount !== uniqueSeatIds.length) {
+      throw new Error("One or more seats are not available");
+    }
+
+    await session.commitTransaction();
+
+    return {
+      success: true,
+      seatIds: uniqueSeatIds,
+      holdUntil,
+    };
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    await session.endSession();
+  }
+}
+
+export async function releaseSeats(showId, seatIds) {
+  if (!seatIds || seatIds.length === 0) {
+    throw new Error("At least one seat is required");
+  }
+
+  const uniqueSeatIds = [...new Set(seatIds)];
+
+  if (uniqueSeatIds.length !== seatIds.length) {
+    throw new Error("Duplicate seat IDs are not allowed");
+  }
+
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    const result = await showInventoryRepository.releaseSeats(
+      showId,
+      uniqueSeatIds,
+      session
+    );
+
+    if (result.modifiedCount !== uniqueSeatIds.length) {
+      throw new Error("One or more seats are not held");
+    }
+
+    await session.commitTransaction();
+
+    return {
+      success: true,
+      seatIds: uniqueSeatIds,
+    };
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    await session.endSession();
+  }
+}
+
+export async function releaseExpiredHolds(showId) {
+  return showInventoryRepository.releaseExpiredHolds(showId);
+}
