@@ -5,6 +5,7 @@ import {eventRoutes} from './routes/eventRoutes.js';
 
 const app = express();
 
+app.use(express.json());
 // Use venue routes
 app.use('/api', venueRoutes);
 //Use event routes
