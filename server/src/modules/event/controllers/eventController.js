@@ -1,4 +1,3 @@
-// import {CreateEventDto,UpdateEventDto,EventResponseDto} from '../dtos/eventDto.js';
 import { json } from 'node:stream/consumers';
 import { handleError } from '../errors/handleError.js';
 
