@@ -6,10 +6,7 @@ COPY package*.json ./
 
 RUN npm ci
 
-COPY tsconfig.json ./
 COPY src ./src
-
-RUN npm run build
 
 EXPOSE 5000
 
