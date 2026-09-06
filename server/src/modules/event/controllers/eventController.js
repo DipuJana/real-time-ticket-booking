@@ -1,4 +1,5 @@
 // import {CreateEventDto,UpdateEventDto,EventResponseDto} from '../dtos/eventDto.js';
+import { json } from 'node:stream/consumers';
 import { handleError } from '../errors/handleError.js';
 
 export class eventController {
@@ -8,6 +9,7 @@ export class eventController {
   async createEvent(req, res) {
     try{
       const eventData = req.body;
+      console.log(JSON.stringify(eventData, null, 2));
       const event=await this.eventService.createEvent(eventData);
       return res.status(201).json({
         success: true,
