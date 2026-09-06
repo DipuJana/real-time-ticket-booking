@@ -4,9 +4,10 @@
   "description": "",
   "main": "src/server.js",
   "scripts": {
-    "dev": "node --watch src/server.js",
-    "start": "node src/server.js"
-  },
+  "dev": "node --watch src/server.js",
+  "start": "node src/server.js",
+  "test": "vitest run"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -16,5 +17,8 @@
     "express": "^5.2.1",
     "ioredis": "^6.0.0",
     "mongoose": "^9.9.2"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.0"
   }
 }
