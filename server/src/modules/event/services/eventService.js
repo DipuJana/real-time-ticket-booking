@@ -11,9 +11,9 @@ export class eventService {
 
   async createEvent(eventData) {
     const event=await this.EventRepository.createEvent(eventData);
-    const response=new EventResponseDto(event);
-    // await cacheService.deletePattern(CacheKeys.eventPattern(event._id));
-    return response;
+    // const response=new EventResponseDto(event);
+    await cacheService.deletePattern(CacheKeys.eventPattern(event._id));
+    return event;
   }
 
   async getAllEvents(filter={}){
@@ -47,9 +47,9 @@ export class eventService {
     if(!event){
       throw new Error('Event not found');
     }
-    const response=new EventResponseDto(event);
-    await cacheService.set(cacheKey,response,{ttl:3600});
-    return response;
+    // const response=new EventResponseDto(event);
+    await cacheService.set(cacheKey,event,{ttl:3600});
+    return event;
   }
 
   async updateEvent(id, eventData) {
@@ -57,9 +57,9 @@ export class eventService {
     if (!updatedEvent) {
       throw new Error('Event not found');
     }
-    const response = new EventResponseDto(updatedEvent);
+    // const response = new EventResponseDto(updatedEvent);
     await cacheInvalidationService.invalidateEventCache(id);
-    return response;
+    return updatedEvent;
   }
 
   async deleteEvent(id) {
