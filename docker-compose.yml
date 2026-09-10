@@ -31,7 +31,6 @@ services:
       MONGO_URI: mongodb://mongodb:27017/ticket_booking?replicaSet=rs0
       REDIS_URL: redis://redis:6379
     depends_on:
-      - mongodb
       - redis
 
   client:
@@ -45,5 +44,4 @@ services:
       - server
 
 volumes:
-  mongodb_data:
   redis_data:
