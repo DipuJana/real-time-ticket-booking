@@ -64,3 +64,6 @@ jobs:
 
       - name: Check server syntax
         run: node --check src/server.js
+
+      - name: Run server tests
+        run: npm test
