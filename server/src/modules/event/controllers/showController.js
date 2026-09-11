@@ -85,6 +85,13 @@ export class ShowController {
       });
     }
 
+    if (error.message === "Show not found") {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
     return handleError(res, error);
   }
 }
