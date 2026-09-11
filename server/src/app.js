@@ -1,11 +1,16 @@
 import express from "express";
-import {venueRoutes} from './routes/venueRoutes.js';
 
-import inventoryRoutes from "./modules/inventory/inventory.routes.js";
+import {venueRoutes} from './routes/venueRoutes.js';
+import {eventRoutes} from './routes/eventRoutes.js';
+
 const app = express();
 
+app.use(express.json());
 // Use venue routes
 app.use('/api', venueRoutes);
+//Use event routes
+app.use('/api', eventRoutes);
+
 
 app.use(express.json());
 
