@@ -8,6 +8,8 @@ const app = express();
 app.use(express.json());
 // Use venue routes
 app.use('/api', venueRoutes);
+//Use event routes
+app.use('/api', eventRoutes);
 
 
 app.use(express.json());
