@@ -146,11 +146,10 @@ describe("ShowController", () => {
 
     await controller.getShowById({ params: { id: showId } }, res);
 
-    expect(res.statusCode).toBe(500);
+    expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({
       success: false,
-      message: "Internal Server Error",
-      error: "Show not found",
+      message: "Show not found",
     });
     errorSpy.mockRestore();
   });
