@@ -56,10 +56,8 @@ UserSchema.virtual('bookings', {
   justOne: false
 });
 
-// Indexes
 UserSchema.index({ email: 1, isActive: 1 });
 
-// Pre-save: hash password
 UserSchema.pre('save', async function () {
 
   if (!this.isModified('passwordHash')) {
@@ -74,12 +72,10 @@ UserSchema.pre('save', async function () {
   );
 });
 
-// Compare password
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.passwordHash);
 };
 
-// Static helpers
 UserSchema.statics.findByEmail = function (email) {
   return this.findOne({ email });
 };

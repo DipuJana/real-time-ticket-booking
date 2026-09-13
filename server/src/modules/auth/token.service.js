@@ -3,9 +3,7 @@ import { jwtConfig } from '../auth/jwt.config.js';
 import { User } from '../auth/models/user.model.js';
 
 export class TokenService {
-  /**
-   * Generate access token
-   */
+
   generateAccessToken(user) {
     const payload = {
       id: user._id,
@@ -17,9 +15,6 @@ export class TokenService {
     });
   }
 
-  /**
-   * Generate refresh token
-   */
   generateRefreshToken(user) {
     const payload = {
       id: user._id
@@ -30,9 +25,6 @@ export class TokenService {
     });
   }
 
-  /**
-   * Generate both tokens
-   */
   generateTokens(user) {
     return {
       accessToken: this.generateAccessToken(user),
@@ -40,9 +32,6 @@ export class TokenService {
     };
   }
 
-  /**
-   * Verify access token
-   */
   verifyAccessToken(token) {
     try {
       return jwt.verify(token, jwtConfig.access.secret);
@@ -57,9 +46,6 @@ export class TokenService {
     }
   }
 
-  /**
-   * Verify refresh token
-   */
   verifyRefreshToken(token) {
     try {
       return jwt.verify(token, jwtConfig.refresh.secret);
@@ -74,28 +60,18 @@ export class TokenService {
     }
   }
 
-  /**
-   * Store refresh token in DB
-   */
   async storeRefreshToken(userId, refreshToken) {
     await User.findByIdAndUpdate(userId, { refreshToken });
   }
 
-  /**
-   * Revoke refresh token
-   */
   async revokeRefreshToken(userId) {
     await User.findByIdAndUpdate(userId, { refreshToken: null });
   }
 
-  /**
-   * Refresh access token using refresh token
-   */
   async refreshAccessToken(refreshToken) {
-    // 1. Verify refresh token
+   
     const decoded = this.verifyRefreshToken(refreshToken);
 
-    // 2. Find user
     const user = await User.findById(decoded.id).select('+refreshToken');
     if (!user) {
       throw new Error('User not found');
@@ -105,15 +81,12 @@ export class TokenService {
       throw new Error('Account is deactivated');
     }
 
-    // 3. Verify token matches stored one
     if (user.refreshToken !== refreshToken) {
       throw new Error('Invalid refresh token');
     }
 
-    // 4. Generate new pair
     const tokens = this.generateTokens(user);
 
-    // 5. Rotate refresh token in DB
     user.refreshToken = tokens.refreshToken;
     await user.save();
 

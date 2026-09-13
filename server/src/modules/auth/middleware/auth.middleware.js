@@ -56,10 +56,6 @@ export const authenticate = async (req, res, next) => {
     });
   }
 };
-
-/**
- * Optional authentication - attaches user if token exists
- */
 export const optionalAuthenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -81,7 +77,6 @@ export const optionalAuthenticate = async (req, res, next) => {
           };
         }
       } catch (error) {
-        // Token invalid - proceed without user
       }
     }
 
