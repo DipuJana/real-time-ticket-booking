@@ -46,3 +46,40 @@ feature/chore branch
        PR
         ↓
       main
+
+
+      # Authentication API
+
+Base URL: `http://localhost:5000`
+
+---
+
+## Endpoints
+
+| Method | Endpoint | Auth | Purpose |
+|--------|----------|------|---------|
+| POST | `/api/auth/register` | ❌ | Register new user |
+| POST | `/api/auth/login` | ❌ | Login user |
+| POST | `/api/auth/refresh` | ❌ | Refresh access token |
+| POST | `/api/auth/logout` | ✅ | Logout user |
+| GET | `/api/auth/profile` | ✅ | Get user profile |
+| PUT | `/api/auth/profile` | ✅ | Update user profile |
+| POST | `/api/auth/change-password` | ✅ | Change password |
+
+---
+
+## 1. Register
+
+**Endpoint:** `POST /api/auth/register`
+
+**Auth:** Not required
+
+### Request Body
+
+```json
+{
+  "fullName": "John Doe",
+  "email": "john@example.com",
+  "password": "SecurePass123",
+  "phone": "+1234567890"
+}
