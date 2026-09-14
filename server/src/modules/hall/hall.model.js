@@ -22,6 +22,10 @@ const hallSchema = new mongoose.Schema(
       required: true,
       min: 1,
     },
+    premiumRows: {
+      type: [String],
+      default: [],
+    },
     capacity: {
       type: Number,
       required: true,
