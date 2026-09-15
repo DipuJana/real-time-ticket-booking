@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { HallError } from "../../src/modules/hall/hall.errors.js";
+import Hall from "../../src/modules/hall/hall.model.js";
 import { HallService } from "../../src/modules/hall/hall.service.js";
 
 const hallRepository = {
@@ -24,6 +25,18 @@ beforeEach(() => {
 });
 
 describe("createHall", () => {
+  test("defaults premiumRows to an empty array", () => {
+    const hall = new Hall({
+      venueId,
+      name: "Screen 1",
+      totalRows: 2,
+      seatsPerRow: 3,
+      capacity: 6,
+    });
+
+    expect(hall.premiumRows).toEqual([]);
+  });
+
   test("creates a valid hall with derived capacity", async () => {
     venueRepository.findVenueById.mockResolvedValue({ _id: venueId });
     hallRepository.create.mockImplementation(async (data) => data);
@@ -32,6 +45,7 @@ describe("createHall", () => {
       name: " Screen 1 ",
       totalRows: 4,
       seatsPerRow: 5,
+      premiumRows: ["B", "D"],
     });
 
     expect(result).toEqual({
@@ -39,6 +53,7 @@ describe("createHall", () => {
       name: "Screen 1",
       totalRows: 4,
       seatsPerRow: 5,
+      premiumRows: ["B", "D"],
       capacity: 20,
     });
   });
@@ -76,6 +91,7 @@ describe("updateHall", () => {
     name: "Screen 1",
     totalRows: 2,
     seatsPerRow: 3,
+    premiumRows: [],
     capacity: 6,
   };
 
@@ -105,6 +121,30 @@ describe("updateHall", () => {
     await expect(hallService.updateHall(hallId, { seatsPerRow: 4 })).rejects.toMatchObject({
       statusCode: 409,
     });
+  });
+
+  test("rejects premiumRows changes after seats exist", async () => {
+    hallRepository.findById.mockResolvedValue(existingHall);
+    seatRepository.findByHallId.mockResolvedValue([{ _id: "seat-id" }]);
+
+    await expect(
+      hallService.updateHall(hallId, { premiumRows: ["B"] })
+    ).rejects.toMatchObject({
+      statusCode: 409,
+      message: "Hall layout cannot be changed after seats have been created",
+    });
+  });
+
+  test("allows premiumRows changes before seats exist without changing capacity", async () => {
+    hallRepository.findById.mockResolvedValue(existingHall);
+    seatRepository.findByHallId.mockResolvedValue([]);
+    hallRepository.updateById.mockImplementation(async (_id, data) => data);
+
+    const result = await hallService.updateHall(hallId, {
+      premiumRows: ["B"],
+    });
+
+    expect(result).toEqual({ premiumRows: ["B"], capacity: 6 });
   });
 
   test("rejects an update capacity that does not match the layout", async () => {
