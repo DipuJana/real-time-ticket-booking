@@ -8,8 +8,48 @@ function isPositiveInteger(value) {
   return Number.isInteger(value) && value > 0;
 }
 
+export function validatePremiumRows(premiumRows, totalRows) {
+  if (!Array.isArray(premiumRows)) {
+    return "premiumRows must be an array";
+  }
+
+  if (
+    premiumRows.some(
+      (rowLabel) =>
+        typeof rowLabel !== "string" || rowLabel.length === 0
+    )
+  ) {
+    return "premiumRows must contain only non-empty strings";
+  }
+
+  if (new Set(premiumRows).size !== premiumRows.length) {
+    return "premiumRows must not contain duplicate row labels";
+  }
+
+  if (isPositiveInteger(totalRows)) {
+    const validRows = new Set(
+      Array.from(
+        { length: totalRows },
+        (_value, row) => String.fromCharCode(65 + row)
+      )
+    );
+
+    if (premiumRows.some((rowLabel) => !validRows.has(rowLabel))) {
+      return "premiumRows contains a row outside the hall layout";
+    }
+  }
+
+  return null;
+}
+
 function validateHallFields(body, { partial }) {
-  const allowedFields = ["name", "totalRows", "seatsPerRow", "capacity"];
+  const allowedFields = [
+    "name",
+    "totalRows",
+    "seatsPerRow",
+    "premiumRows",
+    "capacity",
+  ];
   const suppliedFields = Object.keys(body);
 
   if (suppliedFields.some((field) => !allowedFields.includes(field))) {
@@ -30,6 +70,14 @@ function validateHallFields(body, { partial }) {
 
   if (body.capacity !== undefined && !isPositiveInteger(body.capacity)) {
     return "capacity must be a positive integer";
+  }
+
+  if (body.premiumRows !== undefined) {
+    const premiumRowsError = validatePremiumRows(
+      body.premiumRows,
+      body.totalRows
+    );
+    if (premiumRowsError) return premiumRowsError;
   }
 
   if (partial && suppliedFields.length === 0) {

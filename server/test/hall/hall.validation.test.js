@@ -32,7 +32,7 @@ function expectValidationFailure(validation, req) {
   expect(res.body.success).toBe(false);
 }
 
-test("accepts a valid create hall request", () => {
+test("accepts no premium rows", () => {
   const res = createResponse();
   let nextCalled = false;
   validateCreateHall(
@@ -44,6 +44,62 @@ test("accepts a valid create hall request", () => {
   );
   expect(nextCalled).toBe(true);
   expect(res.statusCode).toBeNull();
+});
+
+test("accepts valid premium rows and preserves their order", () => {
+  const res = createResponse();
+  let nextCalled = false;
+
+  validateCreateHall(
+    {
+      body: {
+        name: "Screen 1",
+        totalRows: 5,
+        seatsPerRow: 3,
+        premiumRows: ["B", "D"],
+      },
+    },
+    res,
+    () => {
+      nextCalled = true;
+    }
+  );
+
+  expect(nextCalled).toBe(true);
+  expect(res.statusCode).toBeNull();
+});
+
+test("rejects a non-array premiumRows value", () => {
+  expectValidationFailure(validateCreateHall, {
+    body: {
+      name: "Screen 1",
+      totalRows: 5,
+      seatsPerRow: 3,
+      premiumRows: "B",
+    },
+  });
+});
+
+test("rejects duplicate premium rows", () => {
+  expectValidationFailure(validateCreateHall, {
+    body: {
+      name: "Screen 1",
+      totalRows: 5,
+      seatsPerRow: 3,
+      premiumRows: ["B", "B"],
+    },
+  });
+});
+
+test("rejects premium rows outside the configured row range", () => {
+  expectValidationFailure(validateCreateHall, {
+    body: {
+      name: "Screen 1",
+      totalRows: 5,
+      seatsPerRow: 3,
+      premiumRows: ["F"],
+    },
+  });
 });
 
 test("rejects an invalid venue ID", () => {

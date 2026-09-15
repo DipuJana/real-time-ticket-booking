@@ -1,4 +1,5 @@
 import { HallError } from "./hall.errors.js";
+import { validatePremiumRows } from "./hall.validation.js";
 
 export class HallService {
   constructor({ hallRepository, venueRepository, seatRepository }) {
@@ -14,6 +15,15 @@ export class HallService {
       throw new HallError("Venue not found", 404);
     }
 
+    const premiumRows = hallData.premiumRows ?? [];
+    const premiumRowsError = validatePremiumRows(
+      premiumRows,
+      hallData.totalRows
+    );
+    if (premiumRowsError) {
+      throw new HallError(premiumRowsError, 400);
+    }
+
     const capacity = this.getConsistentCapacity(hallData);
 
     try {
@@ -22,6 +32,7 @@ export class HallService {
         name: hallData.name.trim(),
         totalRows: hallData.totalRows,
         seatsPerRow: hallData.seatsPerRow,
+        premiumRows,
         capacity,
       });
     } catch (error) {
@@ -41,8 +52,19 @@ export class HallService {
 
     const totalRows = updateData.totalRows ?? hall.totalRows;
     const seatsPerRow = updateData.seatsPerRow ?? hall.seatsPerRow;
+    const premiumRows = updateData.premiumRows ?? hall.premiumRows ?? [];
+    const premiumRowsError = validatePremiumRows(premiumRows, totalRows);
+    if (premiumRowsError) {
+      throw new HallError(premiumRowsError, 400);
+    }
+
+    const premiumRowsChanged =
+      updateData.premiumRows !== undefined &&
+      !this.sameRows(premiumRows, hall.premiumRows ?? []);
     const layoutChanged =
-      totalRows !== hall.totalRows || seatsPerRow !== hall.seatsPerRow;
+      totalRows !== hall.totalRows ||
+      seatsPerRow !== hall.seatsPerRow ||
+      premiumRowsChanged;
 
     if (layoutChanged) {
       const existingSeats = await this.seatRepository.findByHallId(hallId);
@@ -64,6 +86,7 @@ export class HallService {
       ...(updateData.name !== undefined && { name: updateData.name.trim() }),
       ...(updateData.totalRows !== undefined && { totalRows }),
       ...(updateData.seatsPerRow !== undefined && { seatsPerRow }),
+      ...(updateData.premiumRows !== undefined && { premiumRows }),
       capacity,
     };
 
@@ -87,5 +110,12 @@ export class HallService {
     }
 
     return derivedCapacity;
+  }
+
+  sameRows(firstRows, secondRows) {
+    return (
+      firstRows.length === secondRows.length &&
+      firstRows.every((rowLabel, index) => rowLabel === secondRows[index])
+    );
   }
 }
