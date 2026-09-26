@@ -8,6 +8,7 @@ import { authRoutes } from "./modules/auth/auth.routes.js";
 import cors from 'cors';
 import helmet from 'helmet';
 import { authenticate } from "./modules/auth/middleware/auth.middleware.js";
+import { requireAdmin,requireUser,requireRole } from './modules/auth/middleware/role.middleware.js';
 
 const app = express();
 
@@ -19,8 +20,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
-app.use("/api", authenticate, venueRoutes);
-app.use("/api", authenticate,eventRoutes);
+app.use("/api", authenticate,requireRole('admin'), venueRoutes);
+app.use("/api", authenticate,requireRole('admin'),eventRoutes);
 app.use("/api", showRoutes);
 app.use("/api", inventoryRoutes);
 app.use("/api", hallRoutes);

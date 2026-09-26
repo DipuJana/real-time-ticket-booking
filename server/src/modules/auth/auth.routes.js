@@ -3,6 +3,7 @@ import { AuthController } from '../auth/auth.controller.js';
 import { AuthService } from '../auth/auth.service.js';
 import { UserRepository } from '../auth/user.repository.js';
 import { authenticate } from './middleware/auth.middleware.js';
+import { requireAdmin,requireUser,requireRole } from './middleware/role.middleware.js';
 
 const router = Router();
 

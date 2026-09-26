@@ -54,7 +54,7 @@ Base URL: `http://localhost:5000`
 
 ---
 
-## Endpoints
+## Endpoints of Authentication
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
@@ -83,3 +83,7 @@ Base URL: `http://localhost:5000`
   "password": "SecurePass123",
   "phone": "+1234567890"
 }
+
+
+
+

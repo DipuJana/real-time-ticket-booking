@@ -3,11 +3,12 @@ import { jwtConfig } from '../auth/jwt.config.js';
 import { User } from '../auth/models/user.model.js';
 
 export class TokenService {
-
+  
   generateAccessToken(user) {
     const payload = {
-      id: user._id,
-      email: user.email
+      id: user._id.toString(),
+      email: user.email,
+      role: user.role  // ⬅️ ADDED: for RBAC
     };
 
     return jwt.sign(payload, jwtConfig.access.secret, {
@@ -17,7 +18,7 @@ export class TokenService {
 
   generateRefreshToken(user) {
     const payload = {
-      id: user._id
+      id: user._id.toString()
     };
 
     return jwt.sign(payload, jwtConfig.refresh.secret, {
@@ -37,10 +38,14 @@ export class TokenService {
       return jwt.verify(token, jwtConfig.access.secret);
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
-        throw new Error('Access token expired');
+        const err = new Error('Access token expired');
+        err.statusCode = 401;
+        throw err;
       }
       if (error.name === 'JsonWebTokenError') {
-        throw new Error('Invalid access token');
+        const err = new Error('Invalid access token');
+        err.statusCode = 401;
+        throw err;
       }
       throw error;
     }
@@ -51,10 +56,14 @@ export class TokenService {
       return jwt.verify(token, jwtConfig.refresh.secret);
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
-        throw new Error('Refresh token expired');
+        const err = new Error('Refresh token expired');
+        err.statusCode = 401;
+        throw err;
       }
       if (error.name === 'JsonWebTokenError') {
-        throw new Error('Invalid refresh token');
+        const err = new Error('Invalid refresh token');
+        err.statusCode = 401;
+        throw err;
       }
       throw error;
     }
@@ -69,20 +78,25 @@ export class TokenService {
   }
 
   async refreshAccessToken(refreshToken) {
-   
     const decoded = this.verifyRefreshToken(refreshToken);
 
     const user = await User.findById(decoded.id).select('+refreshToken');
     if (!user) {
-      throw new Error('User not found');
+      const error = new Error('User not found');
+      error.statusCode = 401;
+      throw error;
     }
 
     if (!user.isActive) {
-      throw new Error('Account is deactivated');
+      const error = new Error('Account is deactivated');
+      error.statusCode = 403;
+      throw error;
     }
 
     if (user.refreshToken !== refreshToken) {
-      throw new Error('Invalid refresh token');
+      const error = new Error('Invalid refresh token');
+      error.statusCode = 401;
+      throw error;
     }
 
     const tokens = this.generateTokens(user);

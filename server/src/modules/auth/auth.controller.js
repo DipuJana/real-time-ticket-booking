@@ -10,7 +10,7 @@ export class AuthController {
       return res.status(201).json({
         success: true,
         data: result,
-        message: 'User registered successfully'
+        message: 'registered successfully'
       });
     } catch (error) {
       return this.handleError(res, error);

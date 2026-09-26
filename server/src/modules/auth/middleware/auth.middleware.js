@@ -1,5 +1,6 @@
 import { tokenService } from '../token.service.js';
-import {User} from "../models/user.model.js"
+import { User } from '../models/user.model.js';
+
 export const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -44,7 +45,8 @@ export const authenticate = async (req, res, next) => {
     req.user = {
       id: user._id.toString(),
       email: user.email,
-      fullName: user.fullName
+      fullName: user.fullName,
+      role: user.role  
     };
 
     next();
@@ -56,6 +58,7 @@ export const authenticate = async (req, res, next) => {
     });
   }
 };
+
 export const optionalAuthenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -70,13 +73,19 @@ export const optionalAuthenticate = async (req, res, next) => {
           .lean();
 
         if (user && user.isActive) {
+          // ✅ Attach user with role
           req.user = {
             id: user._id.toString(),
             email: user.email,
-            fullName: user.fullName
+            fullName: user.fullName,
+            role: user.role  // ⬅️ CRITICAL for RBAC
           };
         }
       } catch (error) {
+        // Silently ignore — user just won't be attached
+        if (process.env.NODE_ENV === 'development') {
+          console.debug('Optional auth:', error.message);
+        }
       }
     }
 
