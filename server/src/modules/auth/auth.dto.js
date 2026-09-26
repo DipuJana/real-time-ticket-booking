@@ -4,7 +4,7 @@ export class RegisterDto {
     this.email = data.email?.trim().toLowerCase();
     this.password = data.password;
     this.phone = data.phone?.trim();
-    this.role=data.role;
+    this.role='user';
   }
 
   validate() {

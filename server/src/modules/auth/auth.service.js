@@ -31,9 +31,9 @@ export class AuthService {
     const user = await this.userRepository.createUser({
       fullName: registerDto.fullName,
       email: registerDto.email,
-      passwordHash: registerDto.password, // hashed by pre-save hook
+      passwordHash: registerDto.password,
       phone: registerDto.phone,
-      role: registerDto.role
+      role: 'user'
     });
 
     const tokens = tokenService.generateTokens(user);
@@ -137,7 +137,7 @@ export class AuthService {
       fullName: user.fullName,
       email: user.email,
       phone: user.phone,
-      role: user.role
+      role: 'user'
     };
   }
 
@@ -207,7 +207,7 @@ export class AuthService {
     return {
       id: user._id,
       email: user.email,
-      role: user.role
+      role: 'role'
     };
   }
 
