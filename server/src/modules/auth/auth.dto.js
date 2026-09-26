@@ -4,6 +4,7 @@ export class RegisterDto {
     this.email = data.email;
     this.password = data.password;
     this.phone = data.phone;
+    this.role=data.role;
   }
 
   validate() {
@@ -40,6 +41,7 @@ export class UpdateProfileDto {
   constructor(data) {
     this.fullName = data.fullName;
     this.phone = data.phone;
+    this.role=data.role;
   }
 
   validate() {
@@ -79,7 +81,8 @@ export class AuthResponseDto {
       email: user.email,
       phone: user.phone,
       isActive: user.isActive,
-      createdAt: user.createdAt
+      createdAt: user.createdAt,
+      role:user.role
     };
     this.tokens = tokens;
   }

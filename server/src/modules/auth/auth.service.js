@@ -26,7 +26,8 @@ export class AuthService {
       fullName: registerDto.fullName,
       email: registerDto.email,
       passwordHash: registerDto.password, // hashed by pre-save hook
-      phone: registerDto.phone
+      phone: registerDto.phone,
+      role:registerDto.role
     });
     await user.save();
     const tokens = tokenService.generateTokens(user);

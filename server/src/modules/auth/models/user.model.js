@@ -24,6 +24,15 @@ const UserSchema = new mongoose.Schema(
       required: [true, 'Password is required'],
       select: false
     },
+    role:{
+      type:String,
+      enum:{
+        values:['user','admin'],
+        message:'{VALUE} is not a valid role'
+      },
+      default:'user',
+      index:true
+    },
     phone: {
       type: String,
       trim: true,
@@ -57,6 +66,15 @@ UserSchema.virtual('bookings', {
 });
 
 UserSchema.index({ email: 1, isActive: 1 });
+UserSchema.index({ role: 1, isActive: 1});
+
+UserSchema.methods.toJSON=function(){
+  const user=this.toObject({virtuals:true});
+  delete user.passwordHash;
+  delete user.refreshToken;
+  delete user.__v;
+  return user;
+};
 
 UserSchema.pre('save', async function () {
 
@@ -83,5 +101,7 @@ UserSchema.statics.findByEmail = function (email) {
 UserSchema.statics.findByEmailWithPassword = function (email) {
   return this.findOne({ email }).select('+passwordHash');
 };
+
+
 
 export const User = mongoose.model('User', UserSchema);
