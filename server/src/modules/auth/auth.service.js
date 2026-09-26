@@ -105,7 +105,7 @@ export class AuthService {
       fullName: user.fullName,
       email: user.email,
       phone: user.phone,
-      role: user.role,           // ⬅️ Include role
+      role: user.role,
       isActive: user.isActive,
       lastLogin: user.lastLogin,
       createdAt: user.createdAt

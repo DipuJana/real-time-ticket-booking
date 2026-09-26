@@ -8,7 +8,7 @@ export class TokenService {
     const payload = {
       id: user._id.toString(),
       email: user.email,
-      role: user.role  // ⬅️ ADDED: for RBAC
+      role: user.role  
     };
 
     return jwt.sign(payload, jwtConfig.access.secret, {
