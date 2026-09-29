@@ -2,20 +2,27 @@ import app from "./app.js";
 import "./config/env.js";
 import { connectDatabase } from "./config/database.js";
 import { redis } from "./config/redis.js";
+import { User } from "./modules/auth/models/user.model.js";
+import { ensureHardCodedAdmin } from "./modules/auth/Admin.enroll.js";
 
 console.log(process.env.PORT);
 const PORT = process.env.PORT || 5000;
+
+
+
 async function startServer() {
 
 
-await connectDatabase();
+  await connectDatabase();
 
-await redis.ping();
-console.log("Redis ready");
+  await redis.ping();
+  console.log("Redis ready");
 
-  app.listen(PORT,() => {
-  console.log(`Server running on port ${PORT}`);
-});
+  await ensureHardCodedAdmin();
+  
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 }
 
 startServer().catch((error) => {
