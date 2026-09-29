@@ -42,7 +42,7 @@ const showSchema = new mongoose.Schema(
   }
 );
 
-showSchema.pre("validate", function validateSchedule(next) {
+showSchema.pre("validate", function validateSchedule() {
   if (
     this.startTime instanceof Date &&
     this.endTime instanceof Date &&
@@ -52,7 +52,6 @@ showSchema.pre("validate", function validateSchedule(next) {
   ) {
     this.invalidate("endTime", "endTime must be later than startTime");
   }
-  next();
 });
 
 const Show = mongoose.model("Show", showSchema);

@@ -8,13 +8,24 @@ const hallRepository = {
   findById: vi.fn(),
   updateById: vi.fn(),
 };
-const venueRepository = { findVenueById: vi.fn() };
-const seatRepository = { findByHallId: vi.fn() };
+
+const venueRepository = {
+  findVenueById: vi.fn(),
+};
+
+const seatRepository = {
+  findByHallId: vi.fn(),
+};
+
+const inventoryService = {
+  generateSeatsForHall: vi.fn(),
+};
 
 const hallService = new HallService({
   hallRepository,
   venueRepository,
   seatRepository,
+  inventoryService,
 });
 
 const venueId = "507f1f77bcf86cd799439011";
@@ -39,7 +50,13 @@ describe("createHall", () => {
 
   test("creates a valid hall with derived capacity", async () => {
     venueRepository.findVenueById.mockResolvedValue({ _id: venueId });
-    hallRepository.create.mockImplementation(async (data) => data);
+
+    hallRepository.create.mockImplementation(async (data) => ({
+      ...data,
+      _id: hallId,
+    }));
+
+    inventoryService.generateSeatsForHall.mockResolvedValue([]);
 
     const result = await hallService.createHall(venueId, {
       name: " Screen 1 ",
@@ -49,6 +66,7 @@ describe("createHall", () => {
     });
 
     expect(result).toEqual({
+      _id: hallId,
       venueId,
       name: "Screen 1",
       totalRows: 4,
@@ -56,6 +74,15 @@ describe("createHall", () => {
       premiumRows: ["B", "D"],
       capacity: 20,
     });
+
+    expect(
+      inventoryService.generateSeatsForHall
+    ).toHaveBeenCalledWith(
+      hallId,
+      4,
+      5,
+      ["B", "D"]
+    );
   });
 
   test("rejects a nonexistent venue", async () => {
@@ -67,7 +94,10 @@ describe("createHall", () => {
         totalRows: 2,
         seatsPerRow: 3,
       })
-    ).rejects.toMatchObject({ statusCode: 404, message: "Venue not found" });
+    ).rejects.toMatchObject({
+      statusCode: 404,
+      message: "Venue not found",
+    });
   });
 
   test("rejects an inconsistent capacity", async () => {
@@ -100,15 +130,24 @@ describe("updateHall", () => {
     seatRepository.findByHallId.mockResolvedValue([]);
     hallRepository.updateById.mockImplementation(async (_id, data) => data);
 
-    const result = await hallService.updateHall(hallId, { totalRows: 4 });
+    const result = await hallService.updateHall(hallId, {
+      totalRows: 4,
+    });
 
-    expect(result).toEqual({ totalRows: 4, capacity: 12 });
+    expect(result).toEqual({
+      totalRows: 4,
+      capacity: 12,
+    });
   });
 
   test("rejects a nonexistent hall", async () => {
     hallRepository.findById.mockResolvedValue(null);
 
-    await expect(hallService.updateHall(hallId, { name: "Screen 2" })).rejects.toMatchObject({
+    await expect(
+      hallService.updateHall(hallId, {
+        name: "Screen 2",
+      })
+    ).rejects.toMatchObject({
       statusCode: 404,
       message: "Hall not found",
     });
@@ -116,22 +155,33 @@ describe("updateHall", () => {
 
   test("rejects a layout change after seats exist", async () => {
     hallRepository.findById.mockResolvedValue(existingHall);
-    seatRepository.findByHallId.mockResolvedValue([{ _id: "seat-id" }]);
+    seatRepository.findByHallId.mockResolvedValue([
+      { _id: "seat-id" },
+    ]);
 
-    await expect(hallService.updateHall(hallId, { seatsPerRow: 4 })).rejects.toMatchObject({
+    await expect(
+      hallService.updateHall(hallId, {
+        seatsPerRow: 4,
+      })
+    ).rejects.toMatchObject({
       statusCode: 409,
     });
   });
 
   test("rejects premiumRows changes after seats exist", async () => {
     hallRepository.findById.mockResolvedValue(existingHall);
-    seatRepository.findByHallId.mockResolvedValue([{ _id: "seat-id" }]);
+    seatRepository.findByHallId.mockResolvedValue([
+      { _id: "seat-id" },
+    ]);
 
     await expect(
-      hallService.updateHall(hallId, { premiumRows: ["B"] })
+      hallService.updateHall(hallId, {
+        premiumRows: ["B"],
+      })
     ).rejects.toMatchObject({
       statusCode: 409,
-      message: "Hall layout cannot be changed after seats have been created",
+      message:
+        "Hall layout cannot be changed after seats have been created",
     });
   });
 
@@ -144,12 +194,19 @@ describe("updateHall", () => {
       premiumRows: ["B"],
     });
 
-    expect(result).toEqual({ premiumRows: ["B"], capacity: 6 });
+    expect(result).toEqual({
+      premiumRows: ["B"],
+      capacity: 6,
+    });
   });
 
   test("rejects an update capacity that does not match the layout", async () => {
     hallRepository.findById.mockResolvedValue(existingHall);
 
-    await expect(hallService.updateHall(hallId, { capacity: 7 })).rejects.toBeInstanceOf(HallError);
+    await expect(
+      hallService.updateHall(hallId, {
+        capacity: 7,
+      })
+    ).rejects.toBeInstanceOf(HallError);
   });
 });
