@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 import * as seatRepository from "./seat.repository.js";
 import * as showInventoryRepository from "./showInventory.repository.js";
+import {
+  InventoryError,
+  InventoryNotFoundError,
+  InventoryConflictError,
+} from "./inventory.errors.js";
 
 export async function generateSeatsForHall(
   hallId,
@@ -34,7 +39,9 @@ export async function generateShowInventory(showId, hallId) {
   const seats = await seatRepository.findByHallId(hallId);
 
   if (seats.length === 0) {
-    throw new Error("No seats found for this hall");
+    throw new InventoryNotFoundError(
+      "No seats found for this hall"
+    );
   }
 
   const inventory = seats.map((seat) => ({
@@ -51,8 +58,7 @@ export async function generateShowInventory(showId, hallId) {
 export async function getShowSeats(showId) {
   await showInventoryRepository.releaseExpiredHolds(showId);
 
-  const inventory =
-    await showInventoryRepository.findByShowId(showId);
+  const inventory = await showInventoryRepository.findByShowId(showId);
 
   return inventory.sort((a, b) => {
     const rowCompare = a.seatId.rowLabel.localeCompare(
@@ -69,13 +75,19 @@ export async function getShowSeats(showId) {
 
 export async function holdSeats(showId, seatIds) {
   if (!seatIds || seatIds.length === 0) {
-    throw new Error("At least one seat is required");
+    throw new InventoryError(
+      "At least one seat is required",
+      400
+    );
   }
 
   const uniqueSeatIds = [...new Set(seatIds)];
 
   if (uniqueSeatIds.length !== seatIds.length) {
-    throw new Error("Duplicate seat IDs are not allowed");
+    throw new InventoryError(
+      "Duplicate seat IDs are not allowed",
+      400
+    );
   }
 
   const holdUntil = new Date(
@@ -95,7 +107,9 @@ export async function holdSeats(showId, seatIds) {
     );
 
     if (result.modifiedCount !== uniqueSeatIds.length) {
-      throw new Error("One or more seats are not available");
+      throw new InventoryConflictError(
+        "One or more seats are not available"
+      );
     }
 
     await session.commitTransaction();
@@ -115,13 +129,19 @@ export async function holdSeats(showId, seatIds) {
 
 export async function releaseSeats(showId, seatIds) {
   if (!seatIds || seatIds.length === 0) {
-    throw new Error("At least one seat is required");
+    throw new InventoryError(
+      "At least one seat is required",
+      400
+    );
   }
 
   const uniqueSeatIds = [...new Set(seatIds)];
 
   if (uniqueSeatIds.length !== seatIds.length) {
-    throw new Error("Duplicate seat IDs are not allowed");
+    throw new InventoryError(
+      "Duplicate seat IDs are not allowed",
+      400
+    );
   }
 
   const session = await mongoose.startSession();
@@ -136,7 +156,9 @@ export async function releaseSeats(showId, seatIds) {
     );
 
     if (result.modifiedCount !== uniqueSeatIds.length) {
-      throw new Error("One or more seats are not held");
+      throw new InventoryConflictError(
+        "One or more seats are not held"
+      );
     }
 
     await session.commitTransaction();
