@@ -3,19 +3,27 @@ import { HallError } from "../../hall/hall.errors.js";
 const SHOW_STATUSES = new Set(["SCHEDULED", "CANCELLED"]);
 
 export class ShowService {
-  constructor({ showRepository, eventRepository, hallRepository }) {
+  constructor({
+    showRepository,
+    eventRepository,
+    hallRepository,
+    inventoryService,
+  }) {
     this.showRepository = showRepository;
     this.eventRepository = eventRepository;
     this.hallRepository = hallRepository;
+    this.inventoryService = inventoryService;
   }
 
   async createShow(showData) {
     const event = await this.eventRepository.findEventById(showData.eventId);
+
     if (!event) {
       throw new Error("Event not found");
     }
 
     const hall = await this.hallRepository.findById(showData.hallId);
+
     if (!hall) {
       throw new HallError("Hall not found", 404);
     }
@@ -28,18 +36,29 @@ export class ShowService {
       showData.startTime,
       showData.endTime
     );
+
     if (overlappingShow) {
       throw new Error("Show overlaps with an existing show in this hall");
     }
 
-    return this.showRepository.create(showData);
+    const show = await this.showRepository.create(showData);
+
+    // Generate inventory for every seat in the hall for this show.
+    await this.inventoryService.generateShowInventory(
+      show._id,
+      show.hallId
+    );
+
+    return show;
   }
 
   async getShowById(id) {
     const show = await this.showRepository.findById(id);
+
     if (!show) {
       throw new Error("Show not found");
     }
+
     return show;
   }
 
@@ -49,9 +68,11 @@ export class ShowService {
 
   async updateShow(id, updateData) {
     const show = await this.getShowById(id);
+
     const finalHallId = updateData.hallId ?? show.hallId;
     const finalStartTime = updateData.startTime ?? show.startTime;
     const finalEndTime = updateData.endTime ?? show.endTime;
+
     const scheduleChanged =
       !this.sameId(finalHallId, show.hallId) ||
       !this.sameTime(finalStartTime, show.startTime) ||
@@ -59,6 +80,7 @@ export class ShowService {
 
     if (scheduleChanged) {
       const hasInventory = await this.showRepository.hasInventory(id);
+
       if (hasInventory) {
         throw new Error(
           "Show hall and schedule cannot be changed after inventory has been created"
@@ -73,8 +95,11 @@ export class ShowService {
         finalEndTime,
         id
       );
+
       if (overlappingShow) {
-        throw new Error("Show overlaps with an existing show in this hall");
+        throw new Error(
+          "Show overlaps with an existing show in this hall"
+        );
       }
     }
 
@@ -82,7 +107,10 @@ export class ShowService {
       this.validatePrice(updateData.price);
     }
 
-    if (updateData.status !== undefined && !SHOW_STATUSES.has(updateData.status)) {
+    if (
+      updateData.status !== undefined &&
+      !SHOW_STATUSES.has(updateData.status)
+    ) {
       throw new Error("status must be SCHEDULED or CANCELLED");
     }
 
@@ -91,20 +119,31 @@ export class ShowService {
 
   async cancelShow(id) {
     await this.getShowById(id);
-    return this.showRepository.updateById(id, { status: "CANCELLED" });
+
+    return this.showRepository.updateById(id, {
+      status: "CANCELLED",
+    });
   }
 
   validateSchedule(startTime, endTime) {
     const start = new Date(startTime);
     const end = new Date(endTime);
 
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start >= end) {
+    if (
+      Number.isNaN(start.getTime()) ||
+      Number.isNaN(end.getTime()) ||
+      start >= end
+    ) {
       throw new Error("endTime must be later than startTime");
     }
   }
 
   validatePrice(price) {
-    if (typeof price !== "number" || !Number.isFinite(price) || price < 0) {
+    if (
+      typeof price !== "number" ||
+      !Number.isFinite(price) ||
+      price < 0
+    ) {
       throw new Error("price must be a finite non-negative number");
     }
   }
@@ -114,6 +153,9 @@ export class ShowService {
   }
 
   sameTime(firstTime, secondTime) {
-    return new Date(firstTime).getTime() === new Date(secondTime).getTime();
+    return (
+      new Date(firstTime).getTime() ===
+      new Date(secondTime).getTime()
+    );
   }
 }

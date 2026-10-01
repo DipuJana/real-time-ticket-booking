@@ -9,6 +9,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { authenticate } from "./modules/auth/middleware/auth.middleware.js";
 import { requireAdmin,requireUser,requireRole } from './modules/auth/middleware/role.middleware.js';
+import { errorHandler } from "./middleware/error.middleware.js";
+
 
 const app = express();
 
@@ -32,4 +34,7 @@ app.get("/api/health", (_req, res) => {
     status: "ok",
   });
 });
+
+app.use(errorHandler);
+
 export default app;

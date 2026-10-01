@@ -3,6 +3,7 @@ import { ShowController } from "../modules/event/controllers/showController.js";
 import { ShowRepository } from "../modules/event/repositories/showRepository.js";
 import { eventRepository } from "../modules/event/repositories/eventRepositry.js";
 import { ShowService } from "../modules/event/services/showService.js";
+import * as inventoryService from "../modules/inventory/inventory.service.js";
 import {
   validateCreateShow,
   validateEventId,
@@ -17,6 +18,7 @@ const showService = new ShowService({
   showRepository: new ShowRepository(),
   eventRepository: new eventRepository(),
   hallRepository: new HallRepository(),
+  inventoryService,
 });
 const showController = new ShowController(showService);
 

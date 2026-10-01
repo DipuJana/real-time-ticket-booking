@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { venueRepository } from "../event/repositories/venueRepository.js";
 import * as seatRepository from "../inventory/seat.repository.js";
+import * as inventoryService from "../inventory/inventory.service.js";
 import { requireAdmin } from "./hall.authorization.js";
 import { HallController } from "./hall.controller.js";
 import { HallRepository } from "./hall.repository.js";
@@ -17,6 +18,7 @@ const hallService = new HallService({
   hallRepository: new HallRepository(),
   venueRepository: new venueRepository(),
   seatRepository,
+  inventoryService,
 });
 const hallController = new HallController(hallService);
 

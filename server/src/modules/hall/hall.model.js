@@ -40,11 +40,10 @@ const hallSchema = new mongoose.Schema(
 
 hallSchema.index({ venueId: 1, name: 1 }, { unique: true });
 
-hallSchema.pre("validate", function deriveCapacity(next) {
+hallSchema.pre("validate", function deriveCapacity() {
   if (Number.isInteger(this.totalRows) && Number.isInteger(this.seatsPerRow)) {
     this.capacity = this.totalRows * this.seatsPerRow;
   }
-  next();
 });
 
 const Hall = mongoose.model("Hall", hallSchema);

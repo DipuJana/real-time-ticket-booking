@@ -2,10 +2,16 @@ import { HallError } from "./hall.errors.js";
 import { validatePremiumRows } from "./hall.validation.js";
 
 export class HallService {
-  constructor({ hallRepository, venueRepository, seatRepository }) {
+  constructor({
+    hallRepository,
+    venueRepository,
+    seatRepository,
+    inventoryService,
+  }) {
     this.hallRepository = hallRepository;
     this.venueRepository = venueRepository;
     this.seatRepository = seatRepository;
+    this.inventoryService = inventoryService;
   }
 
   async createHall(venueId, hallData) {
@@ -16,10 +22,12 @@ export class HallService {
     }
 
     const premiumRows = hallData.premiumRows ?? [];
+
     const premiumRowsError = validatePremiumRows(
       premiumRows,
       hallData.totalRows
     );
+
     if (premiumRowsError) {
       throw new HallError(premiumRowsError, 400);
     }
@@ -27,7 +35,7 @@ export class HallService {
     const capacity = this.getConsistentCapacity(hallData);
 
     try {
-      return await this.hallRepository.create({
+      const hall = await this.hallRepository.create({
         venueId,
         name: hallData.name.trim(),
         totalRows: hallData.totalRows,
@@ -35,10 +43,24 @@ export class HallService {
         premiumRows,
         capacity,
       });
+
+      // Generate individual seats for the newly created hall.
+      await this.inventoryService.generateSeatsForHall(
+        hall._id,
+        hall.totalRows,
+        hall.seatsPerRow,
+        hall.premiumRows
+      );
+
+      return hall;
     } catch (error) {
       if (error?.code === 11000) {
-        throw new HallError("A hall with this name already exists at this venue", 409);
+        throw new HallError(
+          "A hall with this name already exists at this venue",
+          409
+        );
       }
+
       throw error;
     }
   }
@@ -53,7 +75,12 @@ export class HallService {
     const totalRows = updateData.totalRows ?? hall.totalRows;
     const seatsPerRow = updateData.seatsPerRow ?? hall.seatsPerRow;
     const premiumRows = updateData.premiumRows ?? hall.premiumRows ?? [];
-    const premiumRowsError = validatePremiumRows(premiumRows, totalRows);
+
+    const premiumRowsError = validatePremiumRows(
+      premiumRows,
+      totalRows
+    );
+
     if (premiumRowsError) {
       throw new HallError(premiumRowsError, 400);
     }
@@ -61,6 +88,7 @@ export class HallService {
     const premiumRowsChanged =
       updateData.premiumRows !== undefined &&
       !this.sameRows(premiumRows, hall.premiumRows ?? []);
+
     const layoutChanged =
       totalRows !== hall.totalRows ||
       seatsPerRow !== hall.seatsPerRow ||
@@ -68,6 +96,7 @@ export class HallService {
 
     if (layoutChanged) {
       const existingSeats = await this.seatRepository.findByHallId(hallId);
+
       if (existingSeats.length > 0) {
         throw new HallError(
           "Hall layout cannot be changed after seats have been created",
@@ -83,10 +112,22 @@ export class HallService {
     });
 
     const changes = {
-      ...(updateData.name !== undefined && { name: updateData.name.trim() }),
-      ...(updateData.totalRows !== undefined && { totalRows }),
-      ...(updateData.seatsPerRow !== undefined && { seatsPerRow }),
-      ...(updateData.premiumRows !== undefined && { premiumRows }),
+      ...(updateData.name !== undefined && {
+        name: updateData.name.trim(),
+      }),
+
+      ...(updateData.totalRows !== undefined && {
+        totalRows,
+      }),
+
+      ...(updateData.seatsPerRow !== undefined && {
+        seatsPerRow,
+      }),
+
+      ...(updateData.premiumRows !== undefined && {
+        premiumRows,
+      }),
+
       capacity,
     };
 
@@ -94,8 +135,12 @@ export class HallService {
       return await this.hallRepository.updateById(hallId, changes);
     } catch (error) {
       if (error?.code === 11000) {
-        throw new HallError("A hall with this name already exists at this venue", 409);
+        throw new HallError(
+          "A hall with this name already exists at this venue",
+          409
+        );
       }
+
       throw error;
     }
   }
@@ -115,7 +160,9 @@ export class HallService {
   sameRows(firstRows, secondRows) {
     return (
       firstRows.length === secondRows.length &&
-      firstRows.every((rowLabel, index) => rowLabel === secondRows[index])
+      firstRows.every(
+        (rowLabel, index) => rowLabel === secondRows[index]
+      )
     );
   }
 }
