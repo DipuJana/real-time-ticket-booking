@@ -8,3 +8,4 @@ export function errorHandler(error, req, res, next) {
     message: error.message || "Internal Server Error",
   });
 }
+

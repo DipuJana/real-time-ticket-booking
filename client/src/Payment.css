@@ -1,0 +1,112 @@
+:root {
+    --pay-bg: #ffffff;
+    --pay-text: #1b2430;
+    --pay-muted: #5b6676;
+    --pay-border: #d9dee6;
+    --pay-accent: #1f4fd8;
+    --pay-accent-hover: #1a43b8;
+    --pay-danger: #b3261e;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --pay-bg: #121820;
+        --pay-text: #e8ecf2;
+        --pay-muted: #9aa5b5;
+        --pay-border: #2b3544;
+        --pay-accent: #6d93ff;
+        --pay-accent-hover: #8aa8ff;
+        --pay-danger: #ff8a80;
+    }
+}
+
+.pay-page {
+    max-width: 32rem;
+    margin: 4rem auto;
+    padding: 0 1.25rem;
+    color: var(--pay-text);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.55;
+}
+
+.pay-page h1 {
+    margin: 0 0 0.75rem;
+    font-size: 1.6rem;
+    line-height: 1.25;
+}
+
+.pay-page p {
+    margin: 0 0 0.75rem;
+    color: var(--pay-muted);
+}
+
+.pay-card {
+    margin-top: 1.25rem;
+    padding: 1.25rem;
+    border: 1px solid var(--pay-border);
+    border-radius: 8px;
+    background: var(--pay-bg);
+    color: var(--pay-text);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.pay-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--pay-border);
+}
+
+.pay-timer {
+    font-variant-numeric: tabular-nums;
+}
+
+.pay-timer--low {
+    color: var(--pay-danger);
+}
+
+.pay-btn {
+    width: 100%;
+    margin-top: 1.25rem;
+    padding: 0.8rem 1rem;
+    border: 0;
+    border-radius: 6px;
+    background: var(--pay-accent);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.pay-btn:hover:not(:disabled) {
+    background: var(--pay-accent-hover);
+}
+
+.pay-btn:focus-visible,
+.pay-link:focus-visible {
+    outline: 3px solid var(--pay-accent);
+    outline-offset: 2px;
+}
+
+.pay-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.pay-msg {
+    margin: 0.75rem 0 0;
+    font-size: 0.95rem;
+}
+
+.pay-msg--error {
+    color: var(--pay-danger) !important;
+}
+
+.pay-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: var(--pay-accent);
+    font-weight: 600;
+}
+

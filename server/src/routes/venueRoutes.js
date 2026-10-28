@@ -15,3 +15,4 @@ router.get('/getVenues', (req, res) => VenueController.getAllVenues(req, res));
 router.put('/updateVenues/:id', (req, res) => VenueController.updateVenue(req, res));
 router.delete('/deleteVenues/:id', (req, res) => VenueController.deleteVenue(req, res));
 export const venueRoutes = router;
+

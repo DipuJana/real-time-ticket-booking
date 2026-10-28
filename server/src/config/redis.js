@@ -13,6 +13,7 @@ if (!redisUrl) {
   
 }
 
+
 export const redis = new Redis(redisUrl);
 redis.on("connect", () => {
   console.log("Redis connected");

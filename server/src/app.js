@@ -10,6 +10,7 @@ import helmet from 'helmet';
 import { authenticate } from "./modules/auth/middleware/auth.middleware.js";
 import { requireAdmin,requireUser,requireRole } from './modules/auth/middleware/role.middleware.js';
 import { errorHandler } from "./middleware/error.middleware.js";
+import bookingrouter from "./routes/booking.Routes.js";
 
 
 const app = express();
@@ -21,12 +22,19 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
-app.use("/api", authenticate,requireRole('admin'), venueRoutes);
-app.use("/api", authenticate,requireRole('admin'),eventRoutes);
+app.use("/api/auth", authRoutes);
+
+// Admin-only guards, limited to the paths they protect
+app.use("/api/venues", authenticate, requireRole("admin"));
+app.use("/api/events", authenticate, requireRole("admin"));
+
+app.use("/api", venueRoutes);
+app.use("/api", eventRoutes);
 app.use("/api", showRoutes);
 app.use("/api", inventoryRoutes);
 app.use("/api", hallRoutes);
+
+app.use("/api/booking", bookingrouter);
 
 
 app.get("/api/health", (_req, res) => {
